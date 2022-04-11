@@ -43,25 +43,29 @@ class FilmDataScrapper():
         for x in range(1,19):
             self.start = '&start=' + str(x * 250 + 1)
             self.__process_page()
-        self.__expand_films_info()
+        # self.__expand_films_info()
         
     def __expand_films_info(self):
         self.start = ''
         for entry in self.data:
             if (entry['url'] != None):
-                bs = BeautifulSoup(self.__download_html(entry['url']),'html.parser')
-                entry['popularity'] = bs.find('div', {'class': 'hero-rating-bar__popularity__score'}).text if bs.find('div', {'class': 'hero-rating-bar__popularity__score'}) != None else ''
-                entry['country'] = bs.find(text='País de origen').parent.find('div', {'class': 'ipc-metadata-list-item__list-content-item'}).text if bs.find(text='País de origen') != None else ''
-                entry['creator'] = bs.find(text='Creación').parent.find('div', {'class': 'ipc-metadata-list-item__list-content-item'}).text if bs.find(text='Creación') != None else ''
+                try:
+                    bs = BeautifulSoup(self.__download_html(entry['url']),'html.parser')
+                    entry['popularity'] = bs.find('div', {'class': 'hero-rating-bar__popularity__score'}).text if bs.find('div', {'class': 'hero-rating-bar__popularity__score'}) != None else ''
+                    entry['country'] = bs.find(text='País de origen').parent.find('div', {'class': 'ipc-metadata-list-item__list-content-item'}).text if bs.find(text='País de origen') != None else ''
+                    entry['creator'] = bs.find(text='Creación').parent.find('div', {'class': 'ipc-metadata-list-item__list-content-item'}).text if bs.find(text='Creación') != None else ''
+                except:
+                    print('Error fetching ' + entry['url'])
+                    continue
             
     def dataToCsv(self, filename):
-        file=open("../csv" + filename, "w+")
+        file=open("./csv/" + filename, "w")
         for key in self.data[0]:
             file.write(key.capitalize() + ";")
+        file.write("\n")
         for entry in self.data:
             for key in entry:
                 file.write(entry[key] + ";")
-                print(entry[key] + ";")
             file.write("\n")
             
             
